@@ -1,0 +1,11 @@
+.DS_Store
+
+# Dependencies
+node_modules/
+.next/
+dist/
+build/
+
+# Binary files
+*.node
+backend/bin/

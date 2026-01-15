@@ -1,93 +1,251 @@
-# GeBase V1.0.0
+# Gerege Gebase Platform MVP - Claude Code Prompt
 
+Enterprise-grade Auth & RBAC platform with multi-platform device support, organization hierarchy, granular permission management, and system switching capability.
 
+## Tech Stack
+- **Backend:** Go 1.22+, Gin framework, GORM
+- **Database:** PostgreSQL 15+ (schema: gerege_base)
+- **Frontend:** Next.js 14+ (App Router)
+- **Docs:** Swagger/OpenAPI 3.0
+- **Containerization:** Docker & Docker Compose
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Architecture Overview
 
 ```
-cd existing_repo
-git remote add origin https://git.gerege.mn/ai-driven-gerege/core-platform/gebase-v1.0.0.git
-git branch -M main
-git push -uf origin main
+┌────────────────────────────────────────────────────────────┐
+│                    GEBASE PLATFORM                          │
+│ ┌────────────────────────────────────────────────────────┐ │
+│ │              Platform Layer (Core)                     │ │
+│ │                 system_id = NULL                       │ │
+│ │   User, Organization, Role, Permission, Device, etc.  │ │
+│ └────────────────────────────────────────────────────────┘ │
+│                                                            │
+│                     System Switcher                        │
+│                  ┌────────┴────────┐                       │
+│                  ▼                 ▼                       │
+│  ┌──────────────────────┐ ┌──────────────────────┐        │
+│  │     DSL System       │ │   Gateway System     │        │
+│  │    system_id = 1     │ │    system_id = 2     │        │
+│  │  Schema, Workflow,   │ │  API Client, Integ., │        │
+│  │  Rule, Template      │ │  Webhook, RateLimit  │        │
+│  └──────────────────────┘ └──────────────────────┘        │
+└────────────────────────────────────────────────────────────┘
 ```
 
-## Integrate with your tools
+## Systems Overview
 
-- [ ] [Set up project integrations](https://git.gerege.mn/ai-driven-gerege/core-platform/gebase-v1.0.0/-/settings/integrations)
+| Layer/System | Code     | Description                              |
+|--------------|----------|------------------------------------------|
+| Platform     | (core)   | User, Org, Role, Permission, Device      |
+| DSL          | dsl      | Domain Specific Language Engine          |
+| Gateway      | gateway  | API Management & Integration Hub         |
 
-## Collaborate with your team
+## Multi-Platform Device Support
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+| Platform        | Technology | Device Code     |
+|-----------------|------------|-----------------|
+| Web Browser     | Next.js    | web             |
+| iOS App         | Swift      | ios             |
+| Android App     | Kotlin     | android         |
+| iPad            | Swift      | tablet_ios      |
+| Android Tablet  | Kotlin     | tablet_android  |
+| Windows Desktop | C# WPF     | windows_desktop |
+| Mac Desktop     | Swift      | mac_desktop     |
+| Gerege Kiosk    | C# WPF     | kiosk           |
+| Android POS     | Kotlin     | pos_android     |
+| Linux POS       | Electron/Go| pos_linux       |
 
-## Test and Deploy
+## Core Features
 
-Use the built-in continuous integration in GitLab.
+- **System Switching** - Two-token strategy (platform + system tokens)
+- Төхөөрөмж бүртгэл (Device registration)
+- Session tracking (Хэрэглэгч + Төхөөрөмж + System)
+- Remote configuration
+- Heartbeat monitoring
+- Remote logout
+- Multi-language support via Translations table
+- Role-based dynamic menu rendering per system
+- Permission format:
+  - Platform: `{module.action}`
+  - System: `{system.module.action}`
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Project Structure
 
-***
+```
+gebase/
+├── backend/
+│   ├── cmd/
+│   │   └── server/
+│   │       └── main.go
+│   ├── internal/
+│   │   ├── app/
+│   │   │   └── container.go          # DI container
+│   │   ├── auth/
+│   │   │   ├── jwt.go
+│   │   │   ├── claims.go             # Platform & System claims
+│   │   │   └── session.go
+│   │   ├── config/
+│   │   │   └── config.go
+│   │   ├── db/
+│   │   │   ├── postgres.go
+│   │   │   └── migrations.go
+│   │   ├── domain/
+│   │   │   ├── base.go
+│   │   │   ├── user.go
+│   │   │   ├── organization.go
+│   │   │   ├── system.go
+│   │   │   ├── module.go
+│   │   │   ├── action.go
+│   │   │   ├── permission.go
+│   │   │   ├── role.go
+│   │   │   ├── menu.go
+│   │   │   ├── device.go
+│   │   │   ├── session.go
+│   │   │   ├── language.go
+│   │   │   ├── dsl/                  # DSL System models
+│   │   │   │   ├── schema.go
+│   │   │   │   ├── field.go
+│   │   │   │   ├── rule.go
+│   │   │   │   ├── workflow.go
+│   │   │   │   ├── template.go
+│   │   │   │   ├── function.go
+│   │   │   │   └── variable.go
+│   │   │   └── gateway/              # Gateway System models
+│   │   │       ├── client.go
+│   │   │       ├── endpoint.go
+│   │   │       ├── integration.go
+│   │   │       ├── credential.go
+│   │   │       ├── webhook.go
+│   │   │       ├── rate_limit.go
+│   │   │       └── api_log.go
+│   │   ├── http/
+│   │   │   ├── dto/
+│   │   │   │   ├── request/
+│   │   │   │   └── response/
+│   │   │   ├── handlers/
+│   │   │   └── router/
+│   │   │       └── router.go
+│   │   ├── middleware/
+│   │   │   ├── platform_auth.go      # Platform token auth
+│   │   │   ├── system_auth.go        # System token auth
+│   │   │   ├── rbac.go
+│   │   │   ├── device.go
+│   │   │   ├── cors.go
+│   │   │   └── logger.go
+│   │   ├── repository/
+│   │   └── service/
+│   ├── docs/
+│   │   └── swagger.yaml
+│   ├── docker/
+│   │   └── Dockerfile
+│   ├── .env.example
+│   ├── go.mod
+│   └── go.sum
+├── frontend/
+│   ├── admin/                        # Port 3001 (Platform + All systems admin)
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   ├── (auth)/
+│   │   │   │   ├── (platform)/       # Platform management pages
+│   │   │   │   ├── (dsl)/            # DSL system pages
+│   │   │   │   └── (gateway)/        # Gateway system pages
+│   │   │   ├── components/
+│   │   │   │   └── system-switcher/  # System switching UI
+│   │   │   ├── lib/
+│   │   │   ├── hooks/
+│   │   │   └── types/
+│   │   ├── package.json
+│   │   └── next.config.js
+│   └── portal/                       # Port 3000 (End-user portal)
+│       ├── src/
+│       ├── package.json
+│       └── next.config.js
+├── docker-compose.yml
+└── README.md
+```
 
-# Editing this README
+## Environment Variables
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```env
+# Server
+SERVER_PORT=8000
+SERVER_MODE=development
+SERVER_READ_TIMEOUT=30s
+SERVER_WRITE_TIMEOUT=30s
 
-## Suggestions for a good README
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=gerege_db
+DB_SCHEMA=gerege_base
+DB_SSLMODE=disable
+DB_MAX_IDLE_CONNS=10
+DB_MAX_OPEN_CONNS=100
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# JWT
+JWT_SECRET=your-super-secret-key-change-in-production
+JWT_ACCESS_EXPIRY=24h
+JWT_REFRESH_EXPIRY=168h
 
-## Name
-Choose a self-explaining name for your project.
+# SSO
+SSO_BASE_URL=https://sso.gerege.mn
+SSO_CLIENT_ID=your-client-id
+SSO_CLIENT_SECRET=your-client-secret
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+# Redis (for session caching)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# CORS
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Implementation Order
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+1. Set up project structure, domain models
+2. Configuration and environment
+3. Database connection and migrations
+4. Repository layer implementation
+5. Service layer with business logic
+6. HTTP handlers and routing
+7. Middleware (auth, RBAC, device)
+8. Admin frontend with all CRUD pages
+9. Portal frontend
+10. Docker setup
+11. Seed data and testing
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Key Requirements Checklist
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+- [ ] Platform layer with system_id = NULL for core modules
+- [ ] System switching with two-token strategy (platform token + system token)
+- [ ] All code fields in lowercase with dot notation
+- [ ] ExtraFields embedded in all domain models
+- [ ] NO NameEn fields - use Translations table instead
+- [ ] Multi-language via translations table with key-value pairs
+- [ ] 2 systems: dsl, gateway
+- [ ] Device registration required before login
+- [ ] Session tracking with current_system_id for system context
+- [ ] Role-based dynamic menu rendering per system
+- [ ] Permission code format: 
+  - Platform: `{module.action}` (e.g., user.view)
+  - System: `{system.module.action}` (e.g., dsl.schema.view)
+- [ ] DSL system: schema, field, rule, workflow, template, function, variable
+- [ ] Gateway system: client, endpoint, integration, credential, webhook, ratelimit
+- [ ] Clean architecture
+- [ ] Swagger documentation
+- [ ] Docker containerization
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## Documentation Files
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+1. `00-architecture.md` - Platform + Systems architecture, system switching flow
+2. `01-domain-models-updated.md` - Core domain models with platform layer
+3. `02-dsl-models.md` - DSL system domain models
+4. `03-api-routes-updated.md` - All API endpoints with system switching
+5. `04-seed-data-updated.md` - Initial seed data for platform and systems
+6. `05-docker-config.md` - Docker configuration
+7. `07-gateway-models.md` - Gateway system domain models
+8. `08-frontend-skeleton.md` - Frontend skeleton with system switching UI
