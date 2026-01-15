@@ -12,15 +12,25 @@ func CORS(cfg *config.Config) gin.HandlerFunc {
 
 		// Check if origin is allowed
 		allowed := false
+		allowAll := false
 		for _, allowedOrigin := range cfg.CORS.AllowedOrigins {
-			if allowedOrigin == "*" || allowedOrigin == origin {
+			if allowedOrigin == "*" {
+				allowed = true
+				allowAll = true
+				break
+			}
+			if allowedOrigin == origin {
 				allowed = true
 				break
 			}
 		}
 
 		if allowed {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			if allowAll {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+			} else {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			}
 		}
 
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
