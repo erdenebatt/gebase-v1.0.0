@@ -42,23 +42,24 @@ services:
     container_name: gebase_backend
     ports:
       - "8000:8000"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8000
       - SERVER_MODE=development
-      - DB_HOST=postgres
+      - DB_HOST=13.200.234.102
       - DB_PORT=5432
       - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=gerege_db
+      - DB_PASSWORD=wnyRcmGJZSXJIcWz
+      - DB_NAME=postgres
       - DB_SCHEMA=gerege_base
-      - DB_SSLMODE=disable
+      - DB_SSLMODE=require
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=your-super-secret-key-change-in-production
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
